@@ -37,8 +37,7 @@ public class DBUtils {
         try {
             Connection conn = getConnection();
             System.out.println(conn);
-           
-                             
+            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(DBUtils.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
