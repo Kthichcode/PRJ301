@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package DAO;
+package dao;
 
 import dto.UserDTO;
 import java.sql.Connection;
@@ -19,9 +19,9 @@ import utils.DBUtils;
 
 /**
  *
- * @author tamph
+ * @author tungiF
  */
-public class UserDAO implements IDAO<UserDTO, String>{
+public class UserDAO implements IDAO<UserDTO, String> {
 
     @Override
     public boolean create(UserDTO entity) {
@@ -143,30 +143,33 @@ public class UserDAO implements IDAO<UserDTO, String>{
         String sql = "SELECT [userID], [fullName], [roleID], [password] FROM [tblUsers] "
                 + "WHERE [userID] LIKE ? "
                 + "OR [fullName] LIKE ? "
-                + "OR [roleID] LIKE ? ";
-        try {
+                + "OR [roleID] LIKE ?";
+
+        try (Connection conn = DBUtils.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             String searchPattern = "%" + searchTerm + "%";
-            Connection conn = DBUtils.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, searchPattern);
-            ps.setString(2, searchPattern);
-            ps.setString(3, searchPattern);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                UserDTO user = new UserDTO(
-                        rs.getString("userID"),
-                        rs.getString("fullName"),
-                        rs.getString("roleID"),
-                        rs.getString("password")
-                );
-                list.add(user);
+            // Thiết lập giá trị cho tất cả các tham số
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    UserDTO user = new UserDTO(
+                            rs.getString("userID"),
+                            rs.getString("fullName"),
+                            rs.getString("roleID"),
+                            rs.getString("password")
+                    );
+                    list.add(user);
+                }
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return list;    
+
+        return list;
     }
-    
+
 }
